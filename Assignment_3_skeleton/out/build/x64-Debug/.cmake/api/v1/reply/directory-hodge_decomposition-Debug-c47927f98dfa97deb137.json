@@ -1,0 +1,45 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"hodge_decomposition/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 45,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "C:/Users/dan/Documents/GitHub/hodge_decomposition/Assignment_3_skeleton/bin",
+			"paths" : 
+			[
+				"hodge_decomposition/HodgeDecomposition.exe"
+			],
+			"targetId" : "HodgeDecomposition::@bbdfaae93da8b3230e8f",
+			"targetIndex" : 0,
+			"type" : "target"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "hodge_decomposition",
+		"source" : "hodge_decomposition"
+	}
+}

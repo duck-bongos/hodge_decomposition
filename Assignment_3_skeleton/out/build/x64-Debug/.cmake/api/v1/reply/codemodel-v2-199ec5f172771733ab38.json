@@ -1,0 +1,89 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "hodge_decomposition",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-hodge_decomposition-Debug-c47927f98dfa97deb137.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "hodge_decomposition",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "CCGHomework"
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "HodgeDecomposition",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "HodgeDecomposition::@bbdfaae93da8b3230e8f",
+					"jsonFile" : "target-HodgeDecomposition-Debug-5e4a35bb6cdd4332803b.json",
+					"name" : "HodgeDecomposition",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/dan/Documents/GitHub/hodge_decomposition/Assignment_3_skeleton/out/build/x64-Debug",
+		"source" : "C:/Users/dan/Documents/GitHub/hodge_decomposition/Assignment_3_skeleton"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

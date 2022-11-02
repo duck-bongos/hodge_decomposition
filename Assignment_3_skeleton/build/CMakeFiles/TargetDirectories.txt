@@ -1,0 +1,6 @@
+C:/Users/dan/Documents/GitHub/hodge_decomposition/Assignment_3_skeleton/build/CMakeFiles/INSTALL.dir
+C:/Users/dan/Documents/GitHub/hodge_decomposition/Assignment_3_skeleton/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/dan/Documents/GitHub/hodge_decomposition/Assignment_3_skeleton/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/dan/Documents/GitHub/hodge_decomposition/Assignment_3_skeleton/build/hodge_decomposition/CMakeFiles/HodgeDecomposition.dir
+C:/Users/dan/Documents/GitHub/hodge_decomposition/Assignment_3_skeleton/build/hodge_decomposition/CMakeFiles/INSTALL.dir
+C:/Users/dan/Documents/GitHub/hodge_decomposition/Assignment_3_skeleton/build/hodge_decomposition/CMakeFiles/ALL_BUILD.dir

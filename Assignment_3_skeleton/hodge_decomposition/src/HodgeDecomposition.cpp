@@ -154,6 +154,15 @@ void MeshLib::CHodgeDecomposition::_d(int dimension)
     {
         for (M::MeshFaceIterator fiter(m_pMesh); !fiter.end(); fiter++)
         {
+            /*
+            w([v_i, v_j, v_k]) <-- (
+                - omega([v_i, v_j]) * v_k * normal
+                - omega([v_k, v_i]) * v_j * normal
+                - omega([v_j, v_k]) * v_i * normal
+            )
+
+            pf->form() == w([v_i, v_j, v_k])
+            */
             M::CFace* pf = *fiter;
             pf->form() = 0;
             for (M::FaceHalfedgeIterator fhiter(pf); !fhiter.end(); fhiter++)
@@ -161,7 +170,24 @@ void MeshLib::CHodgeDecomposition::_d(int dimension)
                 M::CHalfEdge* ph = *fhiter;
                 //insert your code here, 
                 //convert halfedge->form() to face->form()
-                m_pMesh->halfedgeEdge(ph);
+                
+                // grab the off-vertex value
+                M::CVertex* offVertex = m_pMesh->halfedgeTarget(m_pMesh->halfedgeNext(ph));
+                double offVertexForm = offVertex->form();
+                
+                // grab the normal value
+                CPoint normalPoint = pf->normal();
+                double normal = normalPoint.norm();
+                
+                // update w([v_i, v_j, v_k])  -= omega * v_off * normal
+                pf->form() -= ph->form() * offVertexForm * normal;
+                
+                /*
+                // backup value to use & keep things in 3d
+
+                CPoint offPoint = hotDamn->point();
+                CPoint newPoint = offPoint * normal * offVertexForm;
+                */
 
             }
         }
@@ -196,6 +222,7 @@ void MeshLib::CHodgeDecomposition::_delta(int dimension)
             M::CVertex* pv = *viter;
             //insert your code here, 
             //convert halfedge->form() to vertex->form()
+
         }
         return;
     }

@@ -130,6 +130,21 @@ void MeshLib::CHodgeDecomposition::_d(int dimension)
                 M::CHalfEdge* ph = *fhiter;
                 //insert your code here, 
                 //convert vertex->form() to halfedge->form()
+                double one_form = ph->form();
+
+                // find source/target vertex from the mesh
+                M::CVertex* source = m_pMesh->halfedgeSource(ph);
+                M::CVertex* target = m_pMesh->halfedgeTarget(ph);
+                
+                // f(v)
+                double f_v = source->form();
+
+                // f(w)
+                double f_w = target->form();
+
+                // calculate f(w) <- f(v) + omega(v, w)
+                f_w = f_v + one_form;
+                
             }
         }
         return;
@@ -146,6 +161,7 @@ void MeshLib::CHodgeDecomposition::_d(int dimension)
                 M::CHalfEdge* ph = *fhiter;
                 //insert your code here, 
                 //convert halfedge->form() to face->form()
+                m_pMesh->halfedgeEdge(ph);
 
             }
         }

@@ -210,6 +210,37 @@ void MeshLib::CHodgeDecomposition::_delta(int dimension)
                 //insert your code here, 
                 //convert face->form() to halfedge->form()
 
+                // F_tri = face->form()
+                double fTri = pf->form();
+
+                // grab current edge so that we can get the COTANGENT EDGE WEIGHTS!
+                M::CEdge* edge = m_pMesh->halfedgeEdge(ph);
+                double edgeWeight = edge->weight();
+
+                // if a boundary
+                if (edge->boundary()) {
+                    // compute the face form difference
+                    // TODO what do I do with this, though? this is supposed to be part of updating the 1 form for <something>
+                    (0 - fTri) / edgeWeight;
+                }
+                else {
+
+                    // get the face on the other side of the edge
+                    M::CHalfEdge* otherHalfEdge;
+                    otherHalfEdge = (ph != m_pMesh->edgeHalfedge(edge, 0) ? m_pMesh->edgeHalfedge(edge, 0): m_pMesh->edgeHalfedge(edge, 1));
+
+                    M::CFace* otherFace;
+                    otherFace = m_pMesh->halfedgeFace(otherHalfEdge);
+
+                    // TODO what do I do with this, though? this is supposed to be part of updating the 1 form for <something>
+                    - (otherFace->form() - fTri) / edgeWeight
+
+                }
+             
+
+
+                
+
             }
         }
         return;

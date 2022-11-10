@@ -129,22 +129,21 @@ void MeshLib::CHodgeDecomposition::_d(int dimension)
             {
                 M::CHalfEdge* ph = *fhiter;
                 //insert your code here, 
-                //convert vertex->form() to halfedge->form()
-                double one_form = ph->form();
+                // calculate f(w) <- f(v) + omega(v, w)
+                // Rewritten as omega(v, w) = f(w) - f(v) since we're focused on ph here
 
                 // find source/target vertex from the mesh
                 M::CVertex* source = m_pMesh->halfedgeSource(ph);
                 M::CVertex* target = m_pMesh->halfedgeTarget(ph);
                 
                 // f(v)
-                double f_v = source->form();
+                double f_source = source->form();
 
                 // f(w)
-                double f_w = target->form();
+                double f_target= target->form();
 
-                // calculate f(w) <- f(v) + omega(v, w)
-                f_w = f_v + one_form;
-                
+                // calculate omega(v, w) = f(w) - f(v)
+                ph->form() = f_target - f_source;
             }
         }
         return;
@@ -170,25 +169,8 @@ void MeshLib::CHodgeDecomposition::_d(int dimension)
                 M::CHalfEdge* ph = *fhiter;
                 //insert your code here, 
                 //convert halfedge->form() to face->form()
-                
-                // grab the off-vertex value
-                M::CVertex* offVertex = m_pMesh->halfedgeTarget(m_pMesh->halfedgeNext(ph));
-                double offVertexForm = offVertex->form();
-                
-                // grab the normal value
-                CPoint normalPoint = pf->normal();
-                double normal = normalPoint.norm();
-                
-                // update w([v_i, v_j, v_k])  -= omega * v_off * normal
-                pf->form() -= ph->form() * offVertexForm * normal;
-                
-                /*
-                // backup value to use & keep things in 3d
-
-                CPoint offPoint = hotDamn->point();
-                CPoint newPoint = offPoint * normal * offVertexForm;
-                */
-
+                // add previous halfedge forms to the current pf
+                pf->form() += ph->form();
             }
         }
         return;
@@ -209,6 +191,40 @@ void MeshLib::CHodgeDecomposition::_delta(int dimension)
                 M::CHalfEdge* ph = *fhiter;
                 //insert your code here, 
                 //convert face->form() to halfedge->form()
+                // get the dual of the current halfedge
+                M::CHalfEdge* dual = m_pMesh->halfedgeSym(ph);
+
+                if (dual != NULL) {
+                    M::CFace* face = m_pMesh->halfedgeFace(ph);
+                    M::CFace* symFace = m_pMesh->halfedgeFace(dual);
+                    double dForm = symFace->form() - face->form();
+
+                    M::CEdge* meshEdge = m_pMesh->halfedgeEdge(ph);
+
+                    // set a minimum weight
+                    double weight = meshEdge->weight();
+                    if (fabs(weight) < 1e-10) {
+                        weight = 1e-10;
+                    }
+
+                    ph->form() = dForm / weight;
+
+                }
+                else {
+                    M::CFace* face = m_pMesh->halfedgeFace(ph);
+                    // zero other side
+                    double dForm = 0 - face->form();
+
+                    M::CEdge* meshEdge = m_pMesh->halfedgeEdge(ph);
+
+                    // set a minimum weight
+                    double weight = meshEdge->weight();
+                    if (fabs(weight) < 1e-10) {
+                        weight = 1e-10;
+                    }
+
+                    ph->form() = dForm / weight;
+                }
 
                 // F_tri = face->form()
                 double fTri = pf->form();
@@ -233,7 +249,7 @@ void MeshLib::CHodgeDecomposition::_delta(int dimension)
                     otherFace = m_pMesh->halfedgeFace(otherHalfEdge);
 
                     // TODO what do I do with this, though? this is supposed to be part of updating the 1 form for <something>
-                    - (otherFace->form() - fTri) / edgeWeight
+                    -(otherFace->form() - fTri) / edgeWeight;
 
                 }
              
@@ -253,6 +269,20 @@ void MeshLib::CHodgeDecomposition::_delta(int dimension)
             M::CVertex* pv = *viter;
             //insert your code here, 
             //convert halfedge->form() to vertex->form()
+            for (M::VertexInHalfedgeIterator vertexHalfEdgeIter(m_pMesh, pv); !vertexHalfEdgeIter.end(); vertexHalfEdgeIter++) {
+                M::CHalfEdge* pHalfEdge = *vertexHalfEdgeIter;
+                M::CEdge* pEdge = m_pMesh->halfedgeEdge(pHalfEdge);
+
+                // update the vertex form value
+                pv->form() += pEdge->weight() * pHalfEdge->form();
+
+                if (pv->boundary()) {
+                    M::CHalfEdge* pHalf = m_pMesh->vertexMostCcwInHalfEdge(pv);
+                    M::CEdge* pe = m_pMesh->halfedgeEdge(pHalf);
+                    pv->form() -= pe->weight() * pHalf->form();
+                }
+            }
+
 
         }
         return;
@@ -271,6 +301,15 @@ void MeshLib::CHodgeDecomposition::_remove_exact_form()
         {
             M::CHalfEdge* ph = *fhiter;
             //insert your code here, remove d vertex->form() from halfedge->form()
+            // grab both the vertices for the edge
+            M::CVertex* pTarget = pM->halfedgeTarget(ph);
+            M::CVertex* pSource = pM->halfedgeSource(ph);
+
+            // calculate the form difference
+            double diff = pTarget->form() - pSource->form();
+            
+            // remove the difference
+            ph->form() -= diff;
         }
     }
 }
@@ -417,6 +456,7 @@ void MeshLib::CHodgeDecomposition::_compute_coexact_form()
         int fid = pf->idx();
 
         double sw = 0;
+        double w = 0;
         for (M::FaceHalfedgeIterator fhiter(pf); !fhiter.end(); ++fhiter)
         {
             M::CHalfEdge* ph = *fhiter;
@@ -424,11 +464,21 @@ void MeshLib::CHodgeDecomposition::_compute_coexact_form()
             if (ps != NULL)
             {
                 //insert your code here
+                M::CFace* psFace = m_pMesh->halfedgeFace(ps);
+                int wid = psFace->idx();
+
+                M::CEdge* e = m_pMesh->halfedgeEdge(ph);
+                w = e->weight();
+
+                A_coefficients.push_back(Eigen::Triplet<double>(fid, wid, 1.0 / w));
             }
             else // boundary face
             {
                 //insert your code here
+                M::CEdge* e = m_pMesh->halfedgeEdge(ph);
+                w = e->weight();
             }
+            sw += 1.0 / w;
         }
         A_coefficients.push_back(Eigen::Triplet<double>(fid, fid, -sw));
     }
@@ -511,6 +561,41 @@ void MeshLib::CHodgeDecomposition::_remove_coexact_form()
         {
             //insert your code here
             //remove delta face->from() from halfedge->form()
+            M::CHalfEdge* halfEdge = *fhiter;
+            // grab the double
+            M::CHalfEdge* halfDual = pM->halfedgeSym(halfEdge);
+
+            double diff = 0;
+            double weight = 0;
+
+            // boundary case
+            if (halfDual == NULL) {
+                M::CFace* face = pM->halfedgeFace(halfEdge);
+                // skip, because there's no other side
+                diff = 0 - face->form();
+
+                M::CEdge* edge = pM->halfedgeEdge(halfEdge);
+                weight = edge->weight();
+
+                
+            }
+            else {
+                M::CFace* face = pM->halfedgeFace(halfEdge);
+                M::CFace* dualFace = pM->halfedgeFace(halfDual);
+
+                diff = dualFace->form() - face->form();
+
+                M::CEdge* edge = pM->halfedgeEdge(halfEdge);
+                weight = edge->weight();
+            }
+
+            // ensure a minimum weight value
+            if (fabs(weight) < 1e-10) {
+                weight = 1e-10;
+            };
+            // update the halfEdge form
+            halfEdge->form() -= diff / weight;
+
         }
     }
 }

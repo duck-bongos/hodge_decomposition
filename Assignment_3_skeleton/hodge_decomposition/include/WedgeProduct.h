@@ -136,7 +136,11 @@ namespace MeshLib
             }
 
             // insert your code here to compute p from du0[3], du1[3];
-            p += ((du0[0] * du1[1] - du0[1] * du1[0]) + (du0[1] * du1[2] - du0[2] * du1[1]) + (du0[2] * du1[0] - du0[0] * du1[2])) / 6;
+            p += (
+                (d0[0] * d1[1] + d0[1] * d2[2] + d0[2] * d1[0]) -
+                (d0[2] * d1[1] + d0[1] * d1[0] + d0[0] * d1[2])
+                )
+            p /= 6;
         }
         return p;
     };
@@ -204,7 +208,7 @@ namespace MeshLib
             {
                 p += (cos(theta[i]) / sin(theta[i])) * du0[i] * du1[i];
             }
-            p /= 2;
+            p *= 0.5;
         }
         return p;
     };
